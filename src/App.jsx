@@ -130,7 +130,7 @@ function Header({
         aria-label="Toggle navigation"
         aria-expanded={isMenuOpen}
       >
-        Γÿ░
+        ☰
       </button>
       <nav className={isMenuOpen ? 'open' : ''}>
         <NavLink
@@ -391,8 +391,8 @@ function LiveUpdatesPage() {
     let mounted = true
     let sse = null
     let reconnectTimer = null
+    let pollTimer = null
     let reconnectAttempts = 0
-    const maxReconnectAttempts = 10
     const reconnectDelay = (attempt) => Math.min(1000 * Math.pow(1.5, attempt), 30000)
 
     const getLiveUpdates = async () => {
@@ -413,13 +413,14 @@ function LiveUpdatesPage() {
     getLiveUpdates()
 
     const connectSSE = () => {
-      if (!mounted || reconnectAttempts >= maxReconnectAttempts) {
+      if (!mounted) {
         return
       }
 
       try {
         sse = new EventSource(`${API_URL}/api/events`)
         sse.addEventListener('schedules', getLiveUpdates)
+        sse.addEventListener('connected', getLiveUpdates)
         sse.onopen = () => {
           reconnectAttempts = 0
         }
@@ -440,11 +441,15 @@ function LiveUpdatesPage() {
     }
 
     connectSSE()
+    pollTimer = window.setInterval(getLiveUpdates, 15000)
 
     return () => {
       mounted = false
       if (reconnectTimer) {
         window.clearTimeout(reconnectTimer)
+      }
+      if (pollTimer) {
+        window.clearInterval(pollTimer)
       }
       sse?.close()
     }
@@ -537,7 +542,7 @@ function HomePage({
           </div>
 
           {playersLoading && <PlayerCarouselSkeleton />}
-          {!playersLoading && players.length === 0 && <p className="players-status">No players yet ΓÇö add players from admin panel.</p>}
+          {!playersLoading && players.length === 0 && <p className="players-status">No players yet — add players from admin panel.</p>}
 
           {!playersLoading && players.length > 0 && (
             <>
@@ -822,7 +827,7 @@ function SchedulePage({ schedules }) {
 function FooterBar() {
   return (
     <footer className="site-footer" aria-label="Site footer">
-      <p className="site-footer-copy">Made with Γ¥ñ∩╕Å</p>
+      <p className="site-footer-copy">Made with ❤️</p>
       <div className="site-footer-socials" aria-label="Social links">
         <a className="site-footer-social-link" href="https://www.instagram.com/dhaneshlakhwani" target="_blank" rel="noreferrer">
           <span className="site-footer-insta-icon" aria-hidden="true">
