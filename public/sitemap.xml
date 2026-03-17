@@ -1,37 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://tsgarmy.fc/</loc>
+    <loc>https://tsgarmy-fc.vercel.app/</loc>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://tsgarmy.fc/home</loc>
+    <loc>https://tsgarmy-fc.vercel.app/home</loc>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://tsgarmy.fc/home/schedule</loc>
+    <loc>https://tsgarmy-fc.vercel.app/home/schedule</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://tsgarmy.fc/tournaments</loc>
+    <loc>https://tsgarmy-fc.vercel.app/tournaments</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://tsgarmy.fc/fanconnect</loc>
+    <loc>https://tsgarmy-fc.vercel.app/fanconnect</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://tsgarmy.fc/giveaways</loc>
+    <loc>https://tsgarmy-fc.vercel.app/giveaways</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://tsgarmy.fc/collaborations</loc>
+    <loc>https://tsgarmy-fc.vercel.app/collaborations</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
