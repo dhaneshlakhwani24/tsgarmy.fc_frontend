@@ -130,7 +130,7 @@ function Header({
         aria-label="Toggle navigation"
         aria-expanded={isMenuOpen}
       >
-        ☰
+        Γÿ░
       </button>
       <nav className={isMenuOpen ? 'open' : ''}>
         <NavLink
@@ -389,6 +389,12 @@ function LiveUpdatesPage() {
 
   useEffect(() => {
     let mounted = true
+    let sse = null
+    let reconnectTimer = null
+    let reconnectAttempts = 0
+    const maxReconnectAttempts = 10
+    const reconnectDelay = (attempt) => Math.min(1000 * Math.pow(1.5, attempt), 30000)
+
     const getLiveUpdates = async () => {
       try {
         const response = await axios.get(`${API_URL}/api/schedules/liveupdates/${slug}`)
@@ -405,15 +411,41 @@ function LiveUpdatesPage() {
     }
 
     getLiveUpdates()
-    let sse = null
-    try {
-      sse = new EventSource(`${API_URL}/api/events`)
-      sse.addEventListener('schedules', getLiveUpdates)
-      sse.onerror = () => sse?.close()
-    } catch {}
+
+    const connectSSE = () => {
+      if (!mounted || reconnectAttempts >= maxReconnectAttempts) {
+        return
+      }
+
+      try {
+        sse = new EventSource(`${API_URL}/api/events`)
+        sse.addEventListener('schedules', getLiveUpdates)
+        sse.onopen = () => {
+          reconnectAttempts = 0
+        }
+        sse.onerror = () => {
+          if (!mounted) {
+            return
+          }
+
+          sse?.close()
+          sse = null
+          reconnectAttempts += 1
+          reconnectTimer = window.setTimeout(connectSSE, reconnectDelay(reconnectAttempts))
+        }
+      } catch {
+        reconnectAttempts += 1
+        reconnectTimer = window.setTimeout(connectSSE, reconnectDelay(reconnectAttempts))
+      }
+    }
+
+    connectSSE()
 
     return () => {
       mounted = false
+      if (reconnectTimer) {
+        window.clearTimeout(reconnectTimer)
+      }
       sse?.close()
     }
   }, [slug])
@@ -505,7 +537,7 @@ function HomePage({
           </div>
 
           {playersLoading && <PlayerCarouselSkeleton />}
-          {!playersLoading && players.length === 0 && <p className="players-status">No players yet — add players from admin panel.</p>}
+          {!playersLoading && players.length === 0 && <p className="players-status">No players yet ΓÇö add players from admin panel.</p>}
 
           {!playersLoading && players.length > 0 && (
             <>
@@ -790,7 +822,7 @@ function SchedulePage({ schedules }) {
 function FooterBar() {
   return (
     <footer className="site-footer" aria-label="Site footer">
-      <p className="site-footer-copy">Made with ❤️</p>
+      <p className="site-footer-copy">Made with Γ¥ñ∩╕Å</p>
       <div className="site-footer-socials" aria-label="Social links">
         <a className="site-footer-social-link" href="https://www.instagram.com/dhaneshlakhwani" target="_blank" rel="noreferrer">
           <span className="site-footer-insta-icon" aria-hidden="true">
