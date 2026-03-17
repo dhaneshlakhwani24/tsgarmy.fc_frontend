@@ -60,14 +60,18 @@ const writeCachedJson = (key, value) => {
 }
 
 const scheduleStatusPriority = {
+  scheduled: 0,
   upcoming: 0,
   ongoing: 1,
+  expired: 2,
   completed: 2,
 }
 
 const scheduleStatusLabel = {
+  scheduled: 'Upcoming',
   upcoming: 'Upcoming',
   ongoing: 'Ongoing',
+  expired: 'Completed',
   completed: 'Completed',
 }
 
@@ -355,7 +359,7 @@ function ScheduleTable({ title, rows }) {
                     )}
                   </td>
                   <td>
-                    {item.status === 'ongoing' && item.liveUpdatesPath ? (
+                    {item.liveUpdatesPath ? (
                       <Link to={item.liveUpdatesPath}>Live (Beta)</Link>
                     ) : (
                       '-'
@@ -802,8 +806,8 @@ function SchedulePage({ schedules }) {
 
   const groups = {
     ongoing: sorted.filter((item) => item.status === 'ongoing'),
-    upcoming: sorted.filter((item) => item.status === 'upcoming'),
-    completed: sorted.filter((item) => item.status === 'completed'),
+    upcoming: sorted.filter((item) => item.status === 'upcoming' || item.status === 'scheduled'),
+    completed: sorted.filter((item) => item.status === 'completed' || item.status === 'expired'),
   }
 
   return (
