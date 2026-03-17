@@ -8,8 +8,8 @@ const FireBackground = lazy(() => import('./components/FireBackground'))
 const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5000' : window.location.origin)
 const ACHIEVEMENTS_API_URL = import.meta.env.VITE_ACHIEVEMENTS_API_URL || ''
 const RESOLVED_ACHIEVEMENTS_API_URL = ACHIEVEMENTS_API_URL || `${API_URL}/api/achievements`
-const PLAYERS_REFRESH_MS = Number(import.meta.env.VITE_PLAYERS_REFRESH_MS || 5000)
-const SCHEDULES_REFRESH_MS = Number(import.meta.env.VITE_SCHEDULES_REFRESH_MS || 15000)
+const PLAYERS_REFRESH_MS = Number(import.meta.env.VITE_PLAYERS_REFRESH_MS || 500)
+const SCHEDULES_REFRESH_MS = Number(import.meta.env.VITE_SCHEDULES_REFRESH_MS || 500)
 const fallbackAchievementRows = fallbackAchievements.map((summary, index) => ({
   id: `fallback-${index}`,
   date: '-',
@@ -1042,22 +1042,50 @@ function App() {
 
     const refreshOnFocus = () => {
       getPlayers()
+      getSchedules()
+      getAchievements()
     }
 
     window.addEventListener('focus', refreshOnFocus)
     document.addEventListener('visibilitychange', refreshOnFocus)
 
     let sse = null
-    try {
-      sse = new EventSource(`${API_URL}/api/events`)
-      sse.addEventListener('players', () => { if (isMounted) getPlayers() })
-      sse.addEventListener('schedules', () => { if (isMounted) getSchedules() })
-      sse.addEventListener('achievements', () => { if (isMounted) getAchievements() })
-      sse.onerror = () => {
-        if (!isMounted) return
-        getSchedules()
+    let reconnectAttempts = 0
+    const maxReconnectAttempts = 10
+    const reconnectDelay = (attempt) => Math.min(1000 * Math.pow(1.5, attempt), 30000)
+
+    const connectSSE = () => {
+      if (reconnectAttempts >= maxReconnectAttempts) {
+        console.warn('SSE: Max reconnection attempts reached')
+        return
       }
-    } catch {}
+
+      try {
+        sse = new EventSource(`${API_URL}/api/events`)
+        reconnectAttempts = 0
+
+        sse.addEventListener('players', () => { if (isMounted) getPlayers() })
+        sse.addEventListener('schedules', () => { if (isMounted) getSchedules() })
+        sse.addEventListener('achievements', () => { if (isMounted) getAchievements() })
+
+        sse.onerror = () => {
+          if (!isMounted) return
+          sse?.close()
+          sse = null
+          reconnectAttempts++
+          const delay = reconnectDelay(reconnectAttempts)
+          console.warn(`SSE: Connection lost. Reconnecting in ${delay}ms (attempt ${reconnectAttempts})`)
+          setTimeout(connectSSE, delay)
+        }
+      } catch (e) {
+        console.error('SSE: Connection failed:', e)
+        reconnectAttempts++
+        const delay = reconnectDelay(reconnectAttempts)
+        setTimeout(connectSSE, delay)
+      }
+    }
+
+    connectSSE()
 
     return () => {
       isMounted = false
