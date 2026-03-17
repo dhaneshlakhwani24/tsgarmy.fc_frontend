@@ -10,7 +10,7 @@ export default defineConfig({
       manifest: {
         name: 'tsgarmy.fc | OG x TSG',
         short_name: 'TSG Army',
-        description: 'Official OG x TSG Free Fire MAX rosters, schedule, achievements, and updates',
+        description: 'Fan-made OG x TSG Free Fire MAX rosters, schedule, achievements, and updates',
         theme_color: '#1a0802',
         background_color: '#030201',
         display: 'standalone',
